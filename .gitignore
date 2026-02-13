@@ -1,0 +1,65 @@
+﻿# OS / IDE
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.iml
+
+# Java / Maven / Gradle
+target/
+*.class
+*.jar
+*.war
+*.ear
+.gradle/
+build/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.venv/
+venv/
+.env
+.env.*
+pip-wheel-metadata/
+
+# Node
+node_modules/
+dist/
+out/
+
+# Logs / runtime artifacts
+*.log
+logs/
+zzlogs/
+*-jar/
+mappings.json
+
+# Upload / storage / data dirs (KB runtime outputs)
+zz-resource/upload-files/
+upload-files/
+data/
+storage/
+opensearch-data/
+milvus-data/
+minio-data/
+
+# Secrets / configs (keep only *.example)
+application-*.yml
+application-*.yaml
+application.yml
+application.yaml
+*.properties
+*.keystore
+*.pem
+*.key
+
+# DB dumps
+*.sql
+*.dump
+*.bak
+
+# Screenshots containing sensitive info (put only cleaned ones)
+docs/screenshots/raw/
