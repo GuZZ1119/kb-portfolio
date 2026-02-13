@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="ic.webadmin.app.dao.KbChunkMapper">
+
+    <resultMap id="KbChunkResultMap" type="ic.webadmin.app.model.KbChunk">
+        <id column="id" property="id"/>
+
+        <result column="create_user_id" property="createUserId"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_user_id" property="updateUserId"/>
+        <result column="update_time" property="updateTime"/>
+        <result column="deleted_flag" property="deletedFlag"/>
+
+        <result column="KB_ID" property="kbId"/>
+        <result column="FILE_ID" property="fileId"/>
+        <result column="CHUNK_INDEX" property="chunkIndex"/>
+
+        <result column="BYTE_START" property="byteStart"/>
+        <result column="BYTE_END" property="byteEnd"/>
+
+        <result column="CONTENT" property="content"/>
+        <result column="CONTENT_LEN" property="contentLen"/>
+        <result column="CONTENT_BYTE_LEN" property="contentByteLen"/>
+        <result column="CONTENT_HASH" property="contentHash"/>
+    </resultMap>
+
+    <!--
+      根据文件Id软删除该文件下所有分段记录。
+      deleted_flag: 1 正常 / 0 已删除
+    -->
+    <update id="softDeleteByFileId">
+        UPDATE ic_kb_chunk
+        SET deleted_flag = 0,
+            update_user_id = #{updateUserId},
+            update_time = #{updateTime}
+        WHERE FILE_ID = #{fileId}
+          AND deleted_flag = 1
+    </update>
+
+    <!-- 批量插入分段对象列表 -->
+    <insert id="batchInsert">
+        INSERT INTO ic_kb_chunk
+        (create_user_id, create_time, update_user_id, update_time, deleted_flag,
+        KB_ID, FILE_ID, CHUNK_INDEX, BYTE_START, BYTE_END,
+        CONTENT, CONTENT_LEN, CONTENT_BYTE_LEN, CONTENT_HASH)
+        VALUES
+        <foreach collection="list" item="it" separator=",">
+            (#{it.createUserId}, #{it.createTime}, #{it.updateUserId}, #{it.updateTime}, #{it.deletedFlag},
+            #{it.kbId}, #{it.fileId}, #{it.chunkIndex}, #{it.byteStart}, #{it.byteEnd},
+            #{it.content}, #{it.contentLen}, #{it.contentByteLen}, #{it.contentHash})
+        </foreach>
+    </insert>
+
+    <select id="selectByFileIdActive" resultMap="KbChunkResultMap">
+        SELECT
+            id, create_user_id, create_time, update_user_id, update_time, deleted_flag,
+            KB_ID, FILE_ID, CHUNK_INDEX, BYTE_START, BYTE_END,
+            CONTENT, CONTENT_LEN, CONTENT_BYTE_LEN, CONTENT_HASH
+        FROM ic_kb_chunk
+        WHERE FILE_ID = #{fileId}
+          AND deleted_flag = 1
+        ORDER BY CHUNK_INDEX ASC
+    </select>
+
+    <select id="selectByKbIdActive" resultMap="KbChunkResultMap">
+        SELECT
+            id, create_user_id, create_time, update_user_id, update_time, deleted_flag,
+            KB_ID, FILE_ID, CHUNK_INDEX, BYTE_START, BYTE_END,
+            CONTENT, CONTENT_LEN, CONTENT_BYTE_LEN, CONTENT_HASH
+        FROM ic_kb_chunk
+        WHERE KB_ID = #{kbId}
+          AND deleted_flag = 1
+        ORDER BY FILE_ID ASC, CHUNK_INDEX ASC
+    </select>
+
+</mapper>
