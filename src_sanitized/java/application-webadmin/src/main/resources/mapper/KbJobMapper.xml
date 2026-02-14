@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="ic.webadmin.app.dao.KbJobMapper">
+    <resultMap id="BaseResultMap" type="ic.webadmin.app.model.KbJob">
+        <id column="id" jdbcType="BIGINT" property="id"/>
+        <result column="create_user_id" jdbcType="BIGINT" property="createUserId"/>
+        <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
+        <result column="update_user_id" jdbcType="BIGINT" property="updateUserId"/>
+        <result column="update_time" jdbcType="TIMESTAMP" property="updateTime"/>
+        <result column="deleted_flag" jdbcType="INTEGER" property="deletedFlag"/>
+        <result column="KB_ID" jdbcType="BIGINT" property="kbId"/>
+        <result column="JOB_TYPE" jdbcType="VARCHAR" property="jobType"/>
+        <result column="TARGET_ID" jdbcType="BIGINT" property="targetId"/>
+        <result column="STATUS" jdbcType="VARCHAR" property="status"/>
+        <result column="PROGRESS" jdbcType="INTEGER" property="progress"/>
+        <result column="MESSAGE" jdbcType="VARCHAR" property="message"/>
+        <result column="START_TIME" jdbcType="TIMESTAMP" property="startTime"/>
+        <result column="END_TIME" jdbcType="TIMESTAMP" property="endTime"/>
+    </resultMap>
+
+    <insert id="insertList">
+        INSERT INTO ic_kb_job
+            (id,
+            create_user_id,
+            create_time,
+            update_user_id,
+            update_time,
+            deleted_flag,
+            KB_ID,
+            JOB_TYPE,
+            TARGET_ID,
+            STATUS,
+            PROGRESS,
+            MESSAGE,
+            START_TIME,
+            END_TIME)
+        VALUES
+        <foreach collection="list" index="index" item="item" separator="," >
+            (#{item.id},
+            #{item.createUserId},
+            #{item.createTime},
+            #{item.updateUserId},
+            #{item.updateTime},
+            #{item.deletedFlag},
+            #{item.kbId},
+            #{item.jobType},
+            #{item.targetId},
+            #{item.status},
+            #{item.progress},
+            #{item.message},
+            #{item.startTime},
+            #{item.endTime})
+        </foreach>
+    </insert>
+
+    <!-- 如果有逻辑删除字段过滤，请写到这里 -->
+    <sql id="filterRef">
+        <!-- 这里必须加上全包名，否则当filterRef被其他Mapper.xml包含引用的时候，就会调用Mapper.xml中的该SQL片段 -->
+        <include refid="ic.webadmin.app.dao.KbJobMapper.inputFilterRef"/>
+        AND ic_kb_job.deleted_flag = ${@ic.common.core.constant.GlobalDeletedFlag@NORMAL}
+    </sql>
+
+    <!-- 这里仅包含调用接口输入的主表过滤条件 -->
+    <sql id="inputFilterRef">
+        <if test="kbJobFilter != null">
+            <if test="kbJobFilter.id != null">
+                AND ic_kb_job.id = #{kbJobFilter.id}
+            </if>
+            <if test="kbJobFilter.kbId != null">
+                AND ic_kb_job.KB_ID = #{kbJobFilter.kbId}
+            </if>
+            <if test="kbJobFilter.jobType != null and kbJobFilter.jobType != ''">
+                AND ic_kb_job.JOB_TYPE = #{kbJobFilter.jobType}
+            </if>
+            <if test="kbJobFilter.targetId != null">
+                AND ic_kb_job.TARGET_ID = #{kbJobFilter.targetId}
+            </if>
+            <if test="kbJobFilter.status != null and kbJobFilter.status != ''">
+                AND ic_kb_job.STATUS = #{kbJobFilter.status}
+            </if>
+        </if>
+    </sql>
+
+    <select id="getKbJobList" resultMap="BaseResultMap">
+        SELECT * FROM ic_kb_job
+        <where>
+            <include refid="filterRef"/>
+        </where>
+        <if test="orderBy != null and orderBy != ''">
+            ORDER BY ${orderBy}
+        </if>
+    </select>
+
+    <update id="updateStatusProgressMessageById">
+        UPDATE ic_kb_job
+        <set>
+            <if test="status != null">STATUS = #{status},</if>
+            <if test="progress != null">PROGRESS = #{progress},</if>
+            <if test="message != null">MESSAGE = #{message},</if>
+            <if test="startTime != null">START_TIME = #{startTime},</if>
+            <if test="endTime != null">END_TIME = #{endTime},</if>
+            update_user_id = #{updateUserId},
+            update_time = NOW()
+        </set>
+        WHERE id = #{id}
+        AND deleted_flag = ${@ic.common.core.constant.GlobalDeletedFlag@NORMAL}
+    </update>
+</mapper>

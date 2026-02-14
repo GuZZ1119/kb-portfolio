@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="ic.webadmin.app.dao.KbLibraryMapper">
+
+    <resultMap id="BaseResultMap" type="ic.webadmin.app.model.KbLibrary">
+        <id column="id" jdbcType="BIGINT" property="id"/>
+        <result column="create_user_id" jdbcType="BIGINT" property="createUserId"/>
+        <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
+        <result column="update_user_id" jdbcType="BIGINT" property="updateUserId"/>
+        <result column="update_time" jdbcType="TIMESTAMP" property="updateTime"/>
+        <result column="deleted_flag" jdbcType="INTEGER" property="deletedFlag"/>
+        <result column="LIB_NAME" jdbcType="VARCHAR" property="libName"/>
+        <result column="KB_TYPE" jdbcType="VARCHAR" property="kbType"/>
+        <result column="KB_DESC" jdbcType="VARCHAR" property="kbDesc"/>
+        <result column="DOC_COUNT" jdbcType="INTEGER" property="docCount"/>
+        <result column="CALL_COUNT" jdbcType="BIGINT" property="callCount"/>
+        <result column="INDEX_STATUS" jdbcType="VARCHAR" property="indexStatus"/>
+        <result column="INDEX_MODE" jdbcType="VARCHAR" property="indexMode"/>
+        <result column="CONFIG_TEXT" jdbcType="LONGVARCHAR" property="configText"/>
+
+        <!-- 新增 -->
+        <result column="VECTOR_INDEX_CONFIG" jdbcType="LONGVARCHAR" property="vectorIndexConfig"/>
+        <result column="INDEX_VERSION" jdbcType="INTEGER" property="indexVersion"/>
+    </resultMap>
+
+    <insert id="insertList">
+        INSERT INTO ic_kb_library
+        (id,
+        create_user_id,
+        create_time,
+        update_user_id,
+        update_time,
+        deleted_flag,
+        LIB_NAME,
+        KB_TYPE,
+        KB_DESC,
+        DOC_COUNT,
+        CALL_COUNT,
+        INDEX_STATUS,
+        INDEX_MODE,
+        CONFIG_TEXT,
+        VECTOR_INDEX_CONFIG,
+        INDEX_VERSION)
+        VALUES
+        <foreach collection="list" index="index" item="item" separator=",">
+            (#{item.id},
+            #{item.createUserId},
+            #{item.createTime},
+            #{item.updateUserId},
+            #{item.updateTime},
+            #{item.deletedFlag},
+            #{item.libName},
+            #{item.kbType},
+            #{item.kbDesc},
+            #{item.docCount},
+            #{item.callCount},
+            #{item.indexStatus},
+            #{item.indexMode},
+            #{item.configText},
+            #{item.vectorIndexConfig},
+            <choose>
+                <when test="item.indexVersion != null">#{item.indexVersion}</when>
+                <otherwise>1</otherwise>
+            </choose>)
+        </foreach>
+    </insert>
+
+
+    <!-- 如果有逻辑删除字段过滤，请写到这里 -->
+    <sql id="filterRef">
+        <include refid="ic.webadmin.app.dao.KbLibraryMapper.inputFilterRef"/>
+        AND ic_kb_library.deleted_flag = ${@ic.common.core.constant.GlobalDeletedFlag@NORMAL}
+    </sql>
+
+    <!-- 这里仅包含调用接口输入的主表过滤条件 -->
+    <sql id="inputFilterRef">
+        <if test="kbLibraryFilter != null">
+            <if test="kbLibraryFilter.libName != null and kbLibraryFilter.libName != ''">
+                <bind name="safeKbLibraryLibName" value="'%' + kbLibraryFilter.libName + '%'" />
+                AND ic_kb_library.LIB_NAME LIKE #{safeKbLibraryLibName}
+            </if>
+            <if test="kbLibraryFilter.kbType != null and kbLibraryFilter.kbType != ''">
+                <bind name="safeKbLibraryKbType" value="'%' + kbLibraryFilter.kbType + '%'" />
+                AND ic_kb_library.KB_TYPE LIKE #{safeKbLibraryKbType}
+            </if>
+            <if test="kbLibraryFilter.searchString != null and kbLibraryFilter.searchString != ''">
+                <bind name="safeKbLibrarySearchString" value="'%' + kbLibraryFilter.searchString + '%'" />
+                AND CONCAT(IFNULL(ic_kb_library.LIB_NAME,''), IFNULL(ic_kb_library.KB_TYPE,'')) LIKE #{safeKbLibrarySearchString}
+            </if>
+        </if>
+    </sql>
+
+    <select id="getKbLibraryList" resultMap="BaseResultMap" parameterType="ic.webadmin.app.model.KbLibrary">
+        SELECT * FROM ic_kb_library
+        <where>
+            <include refid="filterRef"/>
+        </where>
+        <if test="orderBy != null and orderBy != ''">
+            ORDER BY ${orderBy}
+        </if>
+    </select>
+
+    <update id="update" parameterType="ic.webadmin.app.model.KbLibrary">
+        UPDATE ic_kb_library
+        <set>
+            <if test="et.libName != null and et.libName != ''"> LIB_NAME = #{et.libName}, </if>
+            <if test="et.kbType != null and et.kbType != ''"> KB_TYPE = #{et.kbType}, </if>
+            <if test="et.kbDesc != null"> KB_DESC = #{et.kbDesc}, </if>
+            <if test="et.docCount != null"> DOC_COUNT = #{et.docCount}, </if>
+            <if test="et.callCount != null"> CALL_COUNT = #{et.callCount}, </if>
+            <if test="et.indexStatus != null and et.indexStatus != ''"> INDEX_STATUS = #{et.indexStatus}, </if>
+            <if test="et.indexMode != null and et.indexMode != ''"> INDEX_MODE = #{et.indexMode}, </if>
+            <if test="et.configText != null"> CONFIG_TEXT = #{et.configText}, </if>
+            <if test="et.vectorIndexConfig != null"> VECTOR_INDEX_CONFIG = #{et.vectorIndexConfig}, </if>
+            <if test="et.indexVersion != null"> INDEX_VERSION = #{et.indexVersion}, </if>
+
+            update_user_id = #{et.updateUserId},
+            update_time = NOW()
+        </set>
+        WHERE id = #{et.id}
+        AND deleted_flag = ${@ic.common.core.constant.GlobalDeletedFlag@NORMAL}
+    </update>
+
+</mapper>

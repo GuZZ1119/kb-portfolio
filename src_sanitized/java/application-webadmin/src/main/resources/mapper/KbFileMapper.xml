@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="ic.webadmin.app.dao.KbFileMapper">
+
+    <resultMap id="BaseResultMap" type="ic.webadmin.app.model.KbFile">
+        <id column="id" jdbcType="BIGINT" property="id"/>
+        <result column="create_user_id" jdbcType="BIGINT" property="createUserId"/>
+        <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
+        <result column="update_user_id" jdbcType="BIGINT" property="updateUserId"/>
+        <result column="update_time" jdbcType="TIMESTAMP" property="updateTime"/>
+        <result column="deleted_flag" jdbcType="INTEGER" property="deletedFlag"/>
+        <result column="KB_ID" jdbcType="BIGINT" property="kbId"/>
+        <result column="FILE_NAME" jdbcType="VARCHAR" property="fileName"/>
+        <result column="FILE_SIZE" jdbcType="BIGINT" property="fileSize"/>
+        <result column="FILE_EXT" jdbcType="VARCHAR" property="fileExt"/>
+        <result column="MIME_TYPE" jdbcType="VARCHAR" property="mimeType"/>
+        <result column="STORAGE_TYPE" jdbcType="VARCHAR" property="storageType"/>
+        <result column="STORAGE_PATH" jdbcType="VARCHAR" property="storagePath"/>
+        <result column="PARSE_STATUS" jdbcType="VARCHAR" property="parseStatus"/>
+        <result column="PARSE_PROGRESS" jdbcType="INTEGER" property="parseProgress"/>
+        <result column="PARSE_MESSAGE" jdbcType="VARCHAR" property="parseMessage"/>
+        <result column="PARSED_TIME" jdbcType="TIMESTAMP" property="parsedTime"/>
+    </resultMap>
+
+    <insert id="insertList">
+        INSERT INTO ic_kb_file
+        (id,
+        create_user_id,
+        create_time,
+        update_user_id,
+        update_time,
+        deleted_flag,
+        KB_ID,
+        FILE_NAME,
+        FILE_SIZE,
+        FILE_EXT,
+        MIME_TYPE,
+        STORAGE_TYPE,
+        STORAGE_PATH,
+        PARSE_STATUS,
+        PARSE_PROGRESS,
+        PARSE_MESSAGE,
+        PARSED_TIME)
+        VALUES
+        <foreach collection="list" index="index" item="item" separator=",">
+            (#{item.id},
+            #{item.createUserId},
+            #{item.createTime},
+            #{item.updateUserId},
+            #{item.updateTime},
+            #{item.deletedFlag},
+            #{item.kbId},
+            #{item.fileName},
+            #{item.fileSize},
+            #{item.fileExt},
+            #{item.mimeType},
+            #{item.storageType},
+            #{item.storagePath},
+            #{item.parseStatus},
+            #{item.parseProgress},
+            #{item.parseMessage},
+            #{item.parsedTime})
+        </foreach>
+    </insert>
+
+    <!-- 如果有逻辑删除字段过滤，请写到这里 -->
+    <sql id="filterRef">
+        <!-- 这里必须加上全包名，否则当filterRef被其他Mapper.xml包含引用的时候，就会调用Mapper.xml中的该SQL片段 -->
+        <include refid="ic.webadmin.app.dao.KbFileMapper.inputFilterRef"/>
+        AND ic_kb_file.deleted_flag = ${@ic.common.core.constant.GlobalDeletedFlag@NORMAL}
+    </sql>
+
+    <!-- 这里仅包含调用接口输入的主表过滤条件 -->
+    <sql id="inputFilterRef">
+        <if test="kbFileFilter != null">
+
+            <!-- 按知识库ID过滤（KB文件页必用） -->
+            <if test="kbFileFilter.kbId != null">
+                AND ic_kb_file.KB_ID = #{kbFileFilter.kbId}
+            </if>
+
+            <!-- 可选：按解析状态过滤 -->
+            <if test="kbFileFilter.parseStatus != null and kbFileFilter.parseStatus != ''">
+                AND ic_kb_file.PARSE_STATUS = #{kbFileFilter.parseStatus}
+            </if>
+
+            <!-- 可选：按文件名模糊搜索 -->
+            <if test="kbFileFilter.fileName != null and kbFileFilter.fileName != ''">
+                AND ic_kb_file.FILE_NAME LIKE CONCAT('%', #{kbFileFilter.fileName}, '%')
+            </if>
+
+        </if>
+    </sql>
+
+    <!-- 注意：这里不要写 parameterType（Mapper方法是多参数 @Param，会以Map形式传入） -->
+    <select id="getKbFileList" resultMap="BaseResultMap">
+        SELECT * FROM ic_kb_file
+        <where>
+            <include refid="filterRef"/>
+        </where>
+        <if test="orderBy != null and orderBy != ''">
+            ORDER BY ${orderBy}
+        </if>
+    </select>
+
+    <select id="selectByKbIdActive" resultMap="BaseResultMap">
+        SELECT *
+        FROM ic_kb_file
+        WHERE KB_ID = #{kbId}
+          AND PARSE_STATUS = 'SUCCESS'
+          AND deleted_flag = ${@ic.common.core.constant.GlobalDeletedFlag@NORMAL}
+        ORDER BY id ASC
+    </select>
+
+    <update id="updateParseStatusProgressMessageById">
+        UPDATE ic_kb_file
+        <set>
+            <if test="parseStatus != null">PARSE_STATUS = #{parseStatus},</if>
+            <if test="parseProgress != null">PARSE_PROGRESS = #{parseProgress},</if>
+            <if test="parseMessage != null">PARSE_MESSAGE = #{parseMessage},</if>
+            <if test="parsedTime != null">PARSED_TIME = #{parsedTime},</if>
+            update_user_id = #{updateUserId},
+            update_time = NOW()
+        </set>
+        WHERE id = #{id}
+        AND deleted_flag = ${@ic.common.core.constant.GlobalDeletedFlag@NORMAL}
+    </update>
+
+</mapper>
