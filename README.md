@@ -1,40 +1,68 @@
-\# KB Portfolio (Sanitized)
+# KB Portfolio (Sanitized)
 
+A **portfolio-friendly Knowledge Base (KB) indexing & retrieval system**, distilled from a real-world enterprise backend project and **fully sanitized** for public sharing.
 
+This repository focuses on **core backend architecture and indexing logic**, rather than product UI or business-specific integrations.
 
-A portfolio-friendly Knowledge Base (KB) indexing \& retrieval project.
+> 🔒 **Sanitized guarantee**  
+> This repository contains **no private tokens, IP addresses, credentials, internal URLs, customer code, or proprietary dependencies**.
 
+---
 
+## ✨ Key Features
 
-\*\*Core pipeline\*\*
+### Core Pipeline
+- File parsing → cleaning → chunking
+- Chunk-level persistence with metadata (kb / file / chunk)
+- Idempotent re-parse & replace strategy for safe reindexing
 
-\- File parsing → cleaning → chunking
+### Text Indexing (OpenSearch)
+- Bulk upsert for chunk documents
+- Keyword search with filters (kbId / fileId)
+- Highlighted search results
+- Designed for large document collections
 
-\- Text indexing with OpenSearch (bulk upsert + search + highlight)
+### Vector Indexing (Architecture-ready)
+- Java backend → Python FastAPI vector service
+- File-level vector reindex entrypoint
+- Payload size control & safety strategy (TRUNCATE / FAIL)
+- Easily extensible to Milvus / FAISS / other vector stores
 
-\- Vector indexing (architecture-ready; optional)
+### Index Mode Abstraction
+Supports multiple indexing strategies via a unified concept:
 
-\- Index Mode concept: \*\*TEXT / VECTOR / HYBRID\*\*
+- **TEXT**   → OpenSearch (BM25 / keyword search)
+- **VECTOR** → Embedding-based semantic search
+- **HYBRID** → Combined text + vector retrieval
 
-\- Unified reindex entrypoints (file/kb) — design pattern used in the original system
+### Unified Reindex Entry Points
+- Reindex by **file**
+- Reindex by **knowledge base**
+- Internally dispatched by `indexMode`
 
+This mirrors the **design pattern used in the original production system**.
 
+---
 
-> This is a \*\*sanitized\*\* repository: no private tokens, IPs, passwords, customer code, or internal dependencies.
+## 🧱 Project Structure (Sanitized)
 
-
-
-\## Quickstart (Demo: OpenSearch)
-
-
-
-\### 1) Start OpenSearch
-
-```bash
-
-cd demo
-
-docker compose up -d
-
-
-
+```text
+kb-portfolio/
+├─ demo/                    # Local demo (OpenSearch via Docker)
+├─ docs/                    # Architecture notes & diagrams
+├─ samples/                 # Example requests / responses
+├─ src_sanitized/
+│  ├─ java/
+│  │  └─ application-webadmin/
+│  │     ├─ controller/     # KB / Search / Index / Vector APIs
+│  │     ├─ service/        # Core domain services
+│  │     ├─ dao/            # Persistence layer
+│  │     ├─ model/          # Domain models
+│  │     ├─ dto/            # Request / response DTOs
+│  │     └─ resources/
+│  │        └─ mapper/      # MyBatis XML mappers
+│  └─ python/
+│     └─ itpai/             # FastAPI vector service (sanitized)
+├─ .env.example             # Environment variable template
+├─ application.yml.example  # Sanitized config example
+└─ README.md
