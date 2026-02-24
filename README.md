@@ -16,6 +16,7 @@ No internal business code / 不包含任何公司内部业务代码
 
 No environment-specific dependencies / 不依赖特定机器/特定环境路径
 
+
 🚀 What This Demo Shows / 本 Demo 展示内容
 Core Pipeline / 核心流程
 
@@ -30,6 +31,7 @@ Full-text indexing with OpenSearch / 使用 OpenSearch 全文索引
 Search with highlighted results / 支持高亮检索结果
 
 Idempotent reindex (index can be rebuilt anytime) / 幂等重建索引（可随时重建）
+
 
 🧩 Indexing Design / 索引设计思想
 
@@ -53,6 +55,7 @@ Vector indexing is supported in the full system design.
 本 Demo 实现的是 TEXT（OpenSearch）模式。
 向量索引属于完整系统设计的一部分，此仓库以可运行 Demo 为主。
 
+
 🧰 Requirements / 运行环境
 
 Docker Desktop
@@ -61,6 +64,7 @@ Docker Compose v2
 
 本地无需安装 Java / Python / 数据库
 不需要任何既有环境或历史依赖
+
 
 ⚡ Quickstart (One-Command Demo) / 一键启动 Demo
 1) Start all services / 启动服务
@@ -84,6 +88,7 @@ Demo KB API: http://localhost:8080
 Wait about 20–30 seconds for OpenSearch to be ready.
 等待约 20–30 秒，OpenSearch 初始化完成即可。
 
+
 2) Upload a document / 上传文档
 
 Command / 命令：
@@ -95,6 +100,7 @@ Response example / 返回示例：
 "fileId": "69742593-d8a8-450a-a933-78996802aa9d",
 "filename": "demo.txt"
 }
+
 
 3) Build / rebuild the index / 构建（或重建）索引
 
@@ -111,6 +117,7 @@ Clean and split text into chunks / 清洗文本并进行分块（含 overlap）
 Bulk upsert chunks into OpenSearch / 批量 upsert 写入 OpenSearch
 
 Refresh index for immediate search / 刷新索引以便立刻可搜
+
 
 4) Search with highlight / 高亮搜索
 
@@ -132,6 +139,7 @@ Example response / 返回示例：
 ]
 }
 
+
 🔄 Reindexing Design / 重建索引设计说明
 
 This demo supports safe and repeatable reindexing.
@@ -145,6 +153,7 @@ Chunking parameters may change / 分块参数可能调整（chunkSize/overlap）
 
 Supports incremental development & debugging / 支持迭代开发与调试
 
+
 How it works / 工作机制
 
 Each chunk uses a stable ID: fileId:chunkIndex
@@ -156,6 +165,7 @@ The operation is idempotent
 每个 chunk 使用稳定 ID：fileId:chunkIndex
 重建同一文件时覆盖旧数据，不会重复写入
 整体操作幂等，可重复执行
+
 
 🧠 Engineering Highlights / 工程亮点
 
@@ -172,6 +182,7 @@ Zero local environment dependency / 本地零环境依赖
 This repository focuses on clarity, portability, and system design, rather than framework or business complexity.
 本仓库强调清晰、可移植、可复现的系统设计，而非框架堆叠或业务复杂度。
 
+
 📊 OpenSearch Dashboards / 可视化界面
 
 After startup, visit / 启动后访问：
@@ -184,6 +195,7 @@ Index mappings / 索引 mapping
 Indexed chunks / 已写入的 chunk 文档
 
 Query behavior / 查询与高亮效果
+
 
 📦 Project Structure (Demo) / 项目结构（Demo）
 ```
@@ -207,6 +219,7 @@ src_sanitized/ (Sanitized Java / Python code, design reference)
 
 README.md
 ```
+
 🛡️ Notes / 说明
 
 This repository is intended for portfolio/demo usage.
